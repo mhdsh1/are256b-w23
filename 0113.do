@@ -9,17 +9,25 @@
 *********************************************
 *****part1:import data & basic commands******
 *********************************************
+
+// use doedit in order to open the dofile editor
+
 clear all
 set more off
 
 *change working directory (use asterix to comment)
-cd "C:\Users\ZHIRAN\iCloudDrive\Documents\Stata\256B2022\Discussion2"
+cd "C:\Users\mahdi\are256b-w23"
 
 *How to open a .xlsx file
-import excel "C:\Users\Armando\Box\Thumbdrive\UC Davis\ARE 256B\Datasets\Excel\EAWE01.xlsx", sheet("EAWE01") firstrow
+import excel "data\EAWE01.xlsx", sheet("EAWE01") firstrow 
+//firstrow option:  treat first row of Excel data as variable names
+
+browse // taking a look at data!
 	
 *How to open a .dta (Stata) file
-use "C:\Users\Armando\Box\Thumbdrive\UC Davis\ARE 256B\Datasets\Stata\EAWE01.dta", clear
+use "data\EAWE01.dta", clear //we use clear to reaplce the new dataset with the former one
+
+browse
 
 *Data Description
 *Show all variable names
@@ -31,19 +39,25 @@ browse
 *Example
 browse ASVABAR if EDUCMAST==1
 
+codebook
 codebook AGE
 
 *Summary statistcs
 sum
+sum HEIGHT
 sum HEIGHT EDUCMAST AGE MARRIED, detail
 
-tabulate ASVABC
-
+tabulate AGE
 tabulate AGE, summarize(ASVABC) means
 
 *operators:  ==, <, >, <=, >=, !=	
 * | is "or".
 * & is "and".	
+
+sum ASVABC if AGE == 28
+sum ASVABC if AGE != 28
+sum ASVABC if AGE < 28
+
 
 *Example
 browse ASVABAR EDUCMAST MALE if EDUCMAST==1
@@ -52,14 +66,17 @@ browse ASVABAR EDUCMAST MALE if EDUCMAST==1&MALE==1
 
 *Create a new variable
 gen age_today = 2023-BYEAR
+browse age_today
 
-//using functions: log()
+*using functions: log()
 g ln_EARNINGS = log(EARNINGS)	
+browse ln_EARNINGS EARNINGS
 	
 *Create a binary variable for high-school graduation (Yi ) in Stata
 gen grad=0
 replace grad=1 if S>11
 
+browse S grad
 	
 *Eliminate a variable
 drop age_today
@@ -71,13 +88,11 @@ count if HEIGHT>68
 *==============================================================================
 
 
-*********************************************
-*****part2: Regression & Scatter ************
-*********************************************
+*******************************
+*****part2: Graphs ************
+*******************************
 
-*Perform a linear regression of grad (Yi ) on ASVABC (Xi )
-reg grad ASVABC
-reg grad ASVABC,robust
+//take a look at https://www.stata.com/support/faqs/graphics/gph/stata-graphs/
 
 *Create a scatter plot in Stata
 scatter grad ASVABC
@@ -96,50 +111,5 @@ scatter grad ASVABC || lfit grad ASVABC
 twoway lfit grad ASVABC
 
 
-
-//est
-
-*use estout to generate nice tables
-*ssc install estout, replace
-
-*To create nice LATEX/Doc tables we can use this command
-*If you do not want/need Latex output, just erase the commands.
-eststo clear
-eststo: quietly regress grad ASVABC, robust
-eststo: quietly logit grad ASVABC
-*Displays the .tex table in Stata
-esttab, se ar2
-*Exports the table in .tex format
-esttab using "`my_path'q_1_1_reglinresults.tex", se ar2 replace
-esttab using "`my_path'q_1_1_reglinresults.rtf", se ar2 replace
-
-
-
-*==============================================================================
-
-
-*********************************************
-*****part3: Logit & Probit ************
-*********************************************
-
-
-*How can we draw CDFs and PDFs in Stata?
-gen Z=rnormal(0) 
-/* this generates a normal random variable, you could also
-generate a uniform using ‘gen Z=runiform(-3,3)’*/
-
-*CDF
-gen Z_cdf_logit=1/(1+exp(-Z)) 
-gen Z_cdf_probit=normal(Z) 
-sort Z 
-line Z_cdf_logit Z||line Z_cdf_probit Z 
-
-*PDF
-gen Z_pdf_logit=exp(-Z)/(1+exp(-Z))^2
-gen Z_pdf_probit=normalden(Z)
-sort Z
-line Z_pdf_logit Z||line Z_pdf_probit Z
-
-*models
-logit grad ASVABC
-probit grad ASVABC
+*main takeaway: use stata help to learn about command syntaxes, examples, and options as much as you can!
+* either run (help "the command") or google (help "the command" stata)
