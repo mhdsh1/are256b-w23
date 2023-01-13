@@ -1,8 +1,9 @@
 *==============================================================================
-*ARE 256B SECTION 1
-*Date: Jan 7th, 2022
+*ARE 256B W23 -- SECTION 1
+*Date: Jan 13th, 2023
 
-*Stata Warm up by Zhiran
+*Mahdi Shams (mashams@ucdavis.edu)
+* Based on Bulat's Slides, and previous work by Armando Rangel Colina & Zhiran Qin
 *==============================================================================
 
 *********************************************
@@ -12,53 +13,48 @@ clear all
 set more off
 
 *change working directory (use asterix to comment)
-*cd "C:\Users\ZHIRAN\iCloudDrive\Documents\Stata\256B2022\Discussion1"
-*cd "\\tsclient\Documents\Stata\256B2022\Discussion1"
+cd "C:\Users\ZHIRAN\iCloudDrive\Documents\Stata\256B2022\Discussion2"
 
-cd "\\tsclient\Documents\Stata\256B2022\Discussion1"
+*How to open a .xlsx file
+import excel "C:\Users\Armando\Box\Thumbdrive\UC Davis\ARE 256B\Datasets\Excel\EAWE01.xlsx", sheet("EAWE01") firstrow
+	
+*How to open a .dta (Stata) file
+use "C:\Users\Armando\Box\Thumbdrive\UC Davis\ARE 256B\Datasets\Stata\EAWE01.dta", clear
 
+*Data Description
+	*Show all variable names
+	ds
+	*Gives info about variable type
+	describe
+	*Allows user to see the dataset
+	browse
+	*Example
+	browse ASVABAR if EDUCMAST==1
+	*Summary statistcs
+	sum
+	sum HEIGHT EDUCMAST AGE MARRIED, detail
 
-cd "/Users/c/Documents/Stata/256B2022/Discussion1/"
-
-/*import data from dta or xls files
-show how to use the menu bar (foward slash & asterix)*/
-use EAWE01.dta, clear
-import excel "EAWE01.xlsx", sheet("EAWE01") firstrow clear
-
-save EAWE.dta
-*Gives info about variable type
-describe
-help describe
-d
-
-*browse the dataset
-browse
-br ASVABAR
-sort ASVABAR
-
-*operators:  ==, <, >, <=, >=, !=	
-* | is "or".
-* & is "and".	
-*Example
-browse ASVABAR EDUCMAST MALE if EDUCMAST==1
-browse ASVABAR EDUCMAST MALE if EDUCMAST==1&MALE==1
-
-*Count how many observations satisfy a condition
-count if ASVABAR>0
-
-*Summary statistcs
-sum
-sum HEIGHT EDUCMAST AGE MARRIED, detail
 tabulate ASVABC
+
+*Create a new variable
+	gen age_today = 2023-BYEAR
+*Eliminate a variable
+	drop age_today
+*Count how many observations satisfy a condition
+	count if HEIGHT>68
 
 *Create a binary variable for high-school graduation (Yi ) in Stata
 gen grad=0
 replace grad=1 if S>11
 
+*operators:  ==, <, >, <=, >=, !=	
+* | is "or".
+* & is "and".	
 
-*Eliminate a variable
-drop MALE
-keep grad ASVABC
+*Example
+browse ASVABAR EDUCMAST MALE if EDUCMAST==1
+browse ASVABAR EDUCMAST MALE if EDUCMAST==1&MALE==1
+
 
 
 *==============================================================================
@@ -89,6 +85,9 @@ scatter grad ASVABC || lfit grad ASVABC
 twoway lfit grad ASVABC
 
 
+
+//est
+
 *==============================================================================
 
 
@@ -117,3 +116,6 @@ line Z_pdf_logit Z||line Z_pdf_probit Z
 *models
 logit grad ASVABC
 probit grad ASVABC
+
+
+
