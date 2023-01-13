@@ -22,30 +22,24 @@ import excel "C:\Users\Armando\Box\Thumbdrive\UC Davis\ARE 256B\Datasets\Excel\E
 use "C:\Users\Armando\Box\Thumbdrive\UC Davis\ARE 256B\Datasets\Stata\EAWE01.dta", clear
 
 *Data Description
-	*Show all variable names
-	ds
-	*Gives info about variable type
-	describe
-	*Allows user to see the dataset
-	browse
-	*Example
-	browse ASVABAR if EDUCMAST==1
-	*Summary statistcs
-	sum
-	sum HEIGHT EDUCMAST AGE MARRIED, detail
+*Show all variable names
+ds
+*Gives info about variable type
+describe
+*Allows user to see the dataset
+browse
+*Example
+browse ASVABAR if EDUCMAST==1
+
+codebook AGE
+
+*Summary statistcs
+sum
+sum HEIGHT EDUCMAST AGE MARRIED, detail
 
 tabulate ASVABC
 
-*Create a new variable
-	gen age_today = 2023-BYEAR
-*Eliminate a variable
-	drop age_today
-*Count how many observations satisfy a condition
-	count if HEIGHT>68
-
-*Create a binary variable for high-school graduation (Yi ) in Stata
-gen grad=0
-replace grad=1 if S>11
+tabulate AGE, summarize(ASVABC) means
 
 *operators:  ==, <, >, <=, >=, !=	
 * | is "or".
@@ -55,6 +49,23 @@ replace grad=1 if S>11
 browse ASVABAR EDUCMAST MALE if EDUCMAST==1
 browse ASVABAR EDUCMAST MALE if EDUCMAST==1&MALE==1
 
+
+*Create a new variable
+gen age_today = 2023-BYEAR
+
+//using functions: log()
+g ln_EARNINGS = log(EARNINGS)	
+	
+*Create a binary variable for high-school graduation (Yi ) in Stata
+gen grad=0
+replace grad=1 if S>11
+
+	
+*Eliminate a variable
+drop age_today
+
+*Count how many observations satisfy a condition
+count if HEIGHT>68
 
 
 *==============================================================================
@@ -88,6 +99,22 @@ twoway lfit grad ASVABC
 
 //est
 
+*use estout to generate nice tables
+*ssc install estout, replace
+
+*To create nice LATEX/Doc tables we can use this command
+*If you do not want/need Latex output, just erase the commands.
+eststo clear
+eststo: quietly regress grad ASVABC, robust
+eststo: quietly logit grad ASVABC
+*Displays the .tex table in Stata
+esttab, se ar2
+*Exports the table in .tex format
+esttab using "`my_path'q_1_1_reglinresults.tex", se ar2 replace
+esttab using "`my_path'q_1_1_reglinresults.rtf", se ar2 replace
+
+
+
 *==============================================================================
 
 
@@ -116,6 +143,3 @@ line Z_pdf_logit Z||line Z_pdf_probit Z
 *models
 logit grad ASVABC
 probit grad ASVABC
-
-
-
