@@ -8,6 +8,7 @@ Announcements
 ### Access to Stata
 - option 1
 	- https://stata-support.ucdavis.edu/
+	- stata-support@ucdavis.edu
 - option 2
 	- https://virtuallab.ucdavis.edu/
 
