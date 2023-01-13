@@ -2,6 +2,9 @@
 ARE 256B Winter 2023 TA Sections
 
 ## Week 1 - Jan 13
+Announcements
+- Mahdi OH: wednesdays 12h30 to 13h30 at SSH 2143.  
+
 ### Access to Stata
 - option 1
 	- https://stata-support.ucdavis.edu/
