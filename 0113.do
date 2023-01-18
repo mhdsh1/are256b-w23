@@ -112,4 +112,4 @@ twoway lfit grad ASVABC
 
 
 *main takeaway: use stata help to learn about command syntaxes, examples, and options as much as you can!
-* either run (help "the command") or google (help "the command" stata)
+*either run (help "the command") or google (help "the command" stata)

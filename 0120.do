@@ -32,13 +32,23 @@ use "data\EAWE01.dta", clear
 *P(Y_i=1|X_i) = \beta X_i + \epsilon_i 
 *Prob of finishing a bachelor's degree vs composite cognitive ability test
 reg EDUCBA  ASVABC, robust
+
+* calcualting the \hat{Y}_i = \hat{\beta}X_i for some values of X_i
+
 sum ASVABC, detail
+
 display 0.2566+0.1746*0.3341
 display 0.2566+0.1746*1.9718
 display 0.2566+0.1746*(-2.2188)
-	
+
+* alternative way to calculate the predicted probability
+display _b[_cons]+_b[AGE]*0.3341
+display _b[_cons]+_b[AGE]*1.9718
+display _b[_cons]+_b[AGE]*(-2.2188)
+
 *Does the last predicted probability make sense? No, it yields a negative probability
-*let's find the fitted values
+
+*let's find the fitted values for all the observations
 *\hat{Y}_i = \hat{\beta}X_i
 help predict
 predict EDUCBA_hat, xb	
@@ -93,6 +103,7 @@ nlcom norm(_b[ASVABC]*0.8584 + _b[ _cons])
 *At 1 percentile
 nlcom norm(_b[ASVABC]*-2.2188 + _b[ _cons])
 	
+
 *--------------------------------------------------
 *model comparison
 *--------------------------------------------------
@@ -111,7 +122,6 @@ di r(mean)^0.5
 
 qui summarize sqerror_probit
 di r(mean)^0.5
-
 
 *--------------------------------------------------
 *Cenosred data and the Tobit model
