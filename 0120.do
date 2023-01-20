@@ -4,6 +4,10 @@
 *1/20/2023
 *Mahdi Shams (mashams@ucdavis.edu)
 *Based on Bulat's Slides, and previous work by Armando Rangel Colina & Zhiran Qin
+*This code is prepared for the second week of ARE 256B. Here codes related to
+* linear models, nonliniear models (probit), the way to compare models based on
+* rmse is reviewed. Also, there is a discussion of how to make logfiles, exporting
+* graphs, and outputting regression tables with estout package. 
 *--------------------------------------------------
 
 *--------------------------------------------------
@@ -26,11 +30,12 @@ cd "C:\Users\mahdi\are256b-w23"
 use "data\EAWE01.dta", clear 
 
 *--------------------------------------------------
-*linear & nonlinear model
+*linear model
 *--------------------------------------------------
 *let us work with some linear probability models
 *P(Y_i=1|X_i) = \beta X_i + \epsilon_i 
 *Prob of finishing a bachelor's degree vs composite cognitive ability test
+
 reg EDUCBA  ASVABC, robust
 
 * calcualting the \hat{Y}_i = \hat{\beta}X_i for some values of X_i
@@ -42,24 +47,30 @@ display 0.2566+0.1746*1.9718
 display 0.2566+0.1746*(-2.2188)
 
 * alternative way to calculate the predicted probability
-display _b[_cons]+_b[AGE]*0.3341
-display _b[_cons]+_b[AGE]*1.9718
-display _b[_cons]+_b[AGE]*(-2.2188)
+display _b[_cons]+_b[ASVABC]*0.3341
+display _b[_cons]+_b[ASVABC]*1.9718
+display _b[_cons]+_b[ASVABC]*(-2.2188)
 
 *Does the last predicted probability make sense? No, it yields a negative probability
 
 *let's find the fitted values for all the observations
 *\hat{Y}_i = \hat{\beta}X_i
+*command predict yields the fitted values for all the observations based on the "latest" model ran 
 help predict
 predict EDUCBA_hat, xb	
+
+browse EDUCBA EDUCBA_hat
+
 count if EDUCBA_hat>1
 count if EDUCBA_hat<0
 count if missing(EDUCBA_hat)
 
 *Show the predicted probability graphically
 twoway scatter EDUCBA_hat ASVABC
-//graph export outputs/linear.png
+graph export outputs/linear.png
 
+*--------------------------------------------------
+*nonlinear model
 *--------------------------------------------------
 
 *let us move to non-linear probability models
@@ -85,27 +96,27 @@ margins, dydx(ASVABC) atmeans
 // alternative: mfx compute, dydx
 
 *Marginal effects evaluated at a different point
-margins, dydx(ASVABC) at(ASVABC=30)
-margins, dydx(ASVABC) at(ASVABC=70)
+margins, dydx(ASVABC) at(ASVABC=0.1)
+margins, dydx(ASVABC) at(ASVABC=0.6)
 
 *Predict Probability
 *\hat{Y}_i = \Phi{\hat{\beta}X_i}
-*Generate variable that predicts for every observation
 
-predict EDUCBA_probit_hat
-twoway (scatter EDUCBA_probit_hat ASVABC)
-
-*alternative way to calculate the predicted probability
+*calculating the predicted probability
 h nlcom
 h norm
 *At 75 percentile
 nlcom norm(_b[ASVABC]*0.8584 + _b[ _cons])
 *At 1 percentile
 nlcom norm(_b[ASVABC]*-2.2188 + _b[ _cons])
-	
+
+*Generate variable that predicts for every observation
+predict EDUCBA_probit_hat
+browse EDUCBA EDUCBA_hat EDUCBA_probit_hat
+twoway (scatter EDUCBA_probit_hat ASVABC)
 
 *--------------------------------------------------
-*model comparison
+*model comparison based on rmse
 *--------------------------------------------------
 *How do the models compare? (linear vs probit)
 twoway (scatter EDUCBA_probit_hat ASVABC) (scatter EDUCBA_hat ASVABC) (scatter EDUCBA ASVABC)
@@ -116,6 +127,7 @@ twoway (scatter EDUCBA_probit_hat ASVABC) (scatter EDUCBA_hat ASVABC) (scatter E
 
 gen sqerror        = (EDUCBA - EDUCBA_hat)^2
 gen sqerror_probit = (EDUCBA - EDUCBA_probit_hat)^2
+
 
 qui summarize sqerror 
 di r(mean)^0.5
@@ -151,7 +163,7 @@ tobit Y X, ll(0)  robust
 *--------------------------------------------------
 
 *use estout to generate nice tables
-*ssc install estout, replace
+ssc install estout, replace
 
 *To create nice LATEX/Doc tables we can use this command
 *If you do not want/need Latex output, just erase the commands.
@@ -161,7 +173,8 @@ eststo model_p: quietly probit EDUCBA  ASVABC, robust
 
 esttab model_l
 
-esttab model_l using outputs/model_l.tex, replace ///
+
+esttab model_l using outputs/model_l.rtf, replace ///
 se onecell width(\hsize) ///
 addnote() ///
 label title(Estimation Reslt of Linear Model)
@@ -175,4 +188,3 @@ exit
 /*Loose Ends:
 - drawing CDFs and PDFs in Stata? (Slide 41)
 */
-
