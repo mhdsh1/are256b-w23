@@ -33,29 +33,45 @@ clear all
 set obs 50
 * generating a new var X ranging from 11 to 60
 gen X=_n+10
+browse
 * now we generate the error term assuming normal distribution
 * it's good to set seed before generating any random var
 set seed 2023
 gen U=rnormal(0,10)
 
+browse
+
 gen Ystar=-40+1.2*X+U
+browse
+
 gen Y= Ystar*(Ystar>0)
+// Stata trick: the term in the parantheses works as a conditional
+// any conditional term in Stata is either 0 when false or 1 when true. 
+// gen Y= Ystar
+// replace Y = 0 if Ystar <= 0
+
+
 
 scatter Y X if Y>0 || lfit Y X if Y>0|| lfit Ystar X, ///
 legend(label(1 "Y")  label(2 "Truncated Regression")  label(3 "True Regression Relationship") )
 regress Y X if Y>0
 
 tobit Y X, ll(0)  robust
+
+help tobit
+
 *vce represents variance-covariance matrix of the estimators
 tobit Y X, ll(0)  vce(robust)
 
 *--------------------------------------------------
-* part1: Heckit
+* part2: Heckit
 *--------------------------------------------------
 
 use "http://fmwww.bc.edu/ec-p/data/wooldridge/mroz.dta", clear
 * more info on data http://fmwww.bc.edu/ec-p/data/wooldridge/mroz.des
 gen exper2=exper^2
+
+browse
 
 *We want to understand the effect of education and experience on wage
 * but we only observe earning for EMPLOYED individuals.
@@ -69,6 +85,7 @@ gen exper2=exper^2
 *stage 1: finding the probit model 
 gen B=1
 replace B=0 if lwage==.
+* modeling employment status
 probit B nwifeinc age kidslt6 kidsge6
 
 
@@ -92,6 +109,7 @@ gen Z=rnormal(0)
 generate a uniform using ‘gen Z=runiform(-3,3)’*/
 
 *CDF
+* the distribution used for logit is called LOGISTIC
 gen Z_cdf_logit=1/(1+exp(-Z)) 
 gen Z_cdf_probit=normal(Z) 
 sort Z 
@@ -127,3 +145,9 @@ line Z_pdf_logit Z||line Z_pdf_probit Z
 log close // Close the log, end the file
 
 exit
+
+/* Lose ends
+
+1. Why not using robust for heckman?
+
+*/
