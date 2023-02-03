@@ -44,9 +44,7 @@ need the equals sign in the macro definition unless we want Stata to
 do some math first.*/
 
 local x 1
-
-//is the same as
-
+//is the same as:
 local x=1
 
 local x 2+2
@@ -85,35 +83,13 @@ command 10 or more variables that could not be represented in shorthand.*/
 /*if you had a big list of control variables that you used constantly,
 you could define the list as a a macro called controls. Then instead of:*/
 
-
 regress mpg trunk weight length
 
-local varlist trunk weight length
-regress mpg `varlist'
+local apple trunk weight length
+regress mpg `apple'
 
 local varlist "trunk weight length"
 regress mpg `varlist'
-
-*** *** *** ***
-
-reg income edu race occupation location //... (many more control variables)
-
-//you could type
-local controls occupation location
-reg income edu `controls'
-
-/*and be done. Or if you repeatedly deal with subsamples of your data,
-you could define a macro that gave the conditions for that subsample.
-For example:*/
-
-reg income edu `controls' if race=="black" & sex=="female"
-
-//could also be done as
-
-local blackWomen race=="black" & sex=="female"
-
-reg income edu `controls' if `blackWomen'
-
 
 
 *--------------------------------------------------
@@ -122,14 +98,19 @@ reg income edu `controls' if `blackWomen'
 
 **** foreach 
 
+help foreach
+
 foreach i in red blue green {
 di "`i'"
 }
+
+//is same as:
 
 local colors red blue green
 foreach i in `colors' {
 di "`i'"
 }
+//is same as:
 
 local colors red blue green
 foreach i of local colors {
@@ -181,11 +162,12 @@ forvalues i = 0/1 {
 	regress price mpg rep78 displacement if foreign == `i'
 	}
 	
-
 *--------------------------------------------------
 * Bonus: Replication of Table 4.1 of Mastering Metrics
 *--------------------------------------------------
 
+//this is the package that we need in order to 
+// send regression results we get in each loop to excel and append them together
 *new package install
 *ssc install outreg2
 
@@ -194,7 +176,9 @@ clear all
 use "$path\data\AEJfigs_MM_RD", clear
 
 * columns 1 and 3 is the model 4.2 AP2014
+// you only use control for age
 * columns 2 and 4 is the model 4.4 AP2014
+// you control for age, age_sq, and their interaction with the dummy variable
 
 * generate an over>21 dummy
 gen D = (agecell>21)
@@ -205,16 +189,19 @@ gen age_D = age*D
 gen age_sq_D = age_sq*D
 
 
-* define a variable list
+* define a variable list, dependent variables: "all deaths", "motor vehicle accidents releted deaths", ...
 local var_list all mva suicide homicide externalother internal alcohol
 
 * Only replace the Excel file the first time is run
 loc first_step = "replace"
 
-*Loop over var_list (4 different regressions for each dep. variable in varlist) 
+*counting each loop (we expect to run 7 loops as we have 7 different dep. variable)
 loc count = 0
+
+*Loop over var_list (4 different regressions for each dep. variable in varlist) 
+
 foreach i of local var_list {
-*foreach i in `var_list' {
+
 if `count' != 0 loc first_step = "append"
 
 * regressions for column (1)
@@ -292,17 +279,3 @@ log close
 
 translate "$path\0203.smcl" ///
           "$path\0203.pdf", translator(smcl2pdf)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
