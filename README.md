@@ -62,3 +62,14 @@ and this beautiful table from Richard Breen
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|---|
 | Censored         | $y_i$ is known exactly if some criterion defined in terms of y is met.                                                                              | X variables are observed for the entire sample                              | Determinants of income; income is measured exactly only if it is above the poverty line. All other incomes are reported at the poverty line (the lower threshold). |   |
 | Sample Selection | $y_i$ is observed only if a criteria defined in terms of some other random variables (B) is met (e.g. In our example, the criteria is employment status). | We observe the determinants of $B_i$ (which we call by Q) for the entire sample.  | Survey data with item or unit non-response                                                                                                                          |   |
+
+
+## Week 4 - Feb 03
+
+### Commands/coding
+- Macros (local, global)
+- Loops
+- Some bonus hints for HW 2
+
+## Week 5 - Feb 10
+MT 2022 Review
