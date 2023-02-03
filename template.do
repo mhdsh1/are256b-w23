@@ -1,6 +1,6 @@
 *--------------------------------------------------
 *Title
-*file_name.do
+*filename.do
 *1/20/2023
 *Your name (and email adress)
 *--------------------------------------------------
@@ -14,15 +14,16 @@ clear all               // Start with a clean slate
 set linesize 80         // Line size limit to make output more readable
 macro drop _all         // clear all macros
 capture log close       // Close existing log files
-log using file_name.txt, text replace      // Open log file
+log using filename, replace      // Open log file
 *--------------------------------------------------
 
 *set working directory 
-cd "path"
+global path = "C:\Users\..."
+cd $path
 
 *open a .dta (Stata) file
 *we use clear to reaplce the new dataset with the former one
-use "datafile.dta", clear 
+use "$path\data\datafile", clear 
 
 *--------------------------------------------------
 * Question 1
@@ -38,6 +39,10 @@ use "datafile.dta", clear
 
 *--------------------------------------------------
 log close // Close the log, end the file
+
+translate "$path\filename.smcl" ///
+          "$path\filename.pdf", translator(smcl2pdf)
+
 
 exit
 
