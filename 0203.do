@@ -206,14 +206,14 @@ if `count' != 0 loc first_step = "append"
 
 * regressions for column (1)
 qui reg `i' D age, robust
-outreg2  using "$path\outputs\rd.xls", dec(3) bdec(3)tdec(3) rdec(3) alpha(.01, .05, .1) `first_step'
+outreg2  using "$path\outputs\rd.xls", keep(D) dec(3) bdec(3)tdec(3) rdec(3) alpha(.01, .05, .1) `first_step'
 
 * regressions for column (2)
 // home exercise
 
 * regressions for column (3)
 qui reg `i' D age if inrange(agecell, 20 , 22 ) , robust
-outreg2  using "$path\outputs\rd.xls", dec(3) bdec(3)tdec(3) rdec(3) alpha(.01, .05, .1) append
+outreg2  using "$path\outputs\rd.xls", keep(D) dec(3) bdec(3)tdec(3) rdec(3) alpha(.01, .05, .1) append
 //inrange(z,a,b): 1 if it is known that a < z < b; otherwise, 0
 
 * regressions for column (4)
