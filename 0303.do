@@ -28,19 +28,23 @@ cd $path
 * Part 1: Seasonal patterns: Electronic prices
 *--------------------------------------------------
 
-import delimited "APU000072610.csv",clear
+import excel "data/APU000072610.xlsx", firstrow clear 
+
+// Average Price: Electricity per Kw-H in U.S. City Average, U.S. Dollars, Monthly
+// Not Seasonally Adjusted
+// Source: https://fred.stlouisfed.org/series/APU000072610
 
 *rename variables
-rename apu000072610 p
+rename APU000072610 p
+rename DATE date
+destring p, replace
 
 *time format
-generate date1 = date(date, "YMD")
-gen date2 = date1
-format date2 %td
+format date %td
 
 *extract month and year
-gen mth = month(date2) 
-gen yr = year(date2)
+gen mth = month(date) 
+gen yr = year(date)
 
 *generate a new monthly time index
 gen month = ym(yr,mth)
@@ -48,29 +52,30 @@ format month %tm
 tsset month
 
 *or
-gen mdate = mofd(date2)
-format mdate %tm
+//gen mdate = mofd(date)
+//format mdate %tm
 
 
 *seasonal?
 tsline p
 tsline p if  inrange(yr, 2000, 2003)
 
-*(a)Seasonal dummies
 *Generate a new variable seasonal that is equal to 1 for t 
 *corresponding to January and 0 otherwise. 
 
 gen seasonal = 1 if mth == 1
 replace seasonal = 0 if seasonal == .
 
-*Compute regression of gcem on L(0=10)seasonal.
+*Remember: Problem 2 in HW3:
+*Compute regression of gcem on L(0/10)seasonal.
 *Which months has the largest and the smallest average values for gcem? 
 
 *use December as a base case
-reg p L(0/10).seasonal,robust
+reg p L(0/10).seasonal,robust 
 
 *use January as a base case
 reg p i.mth, robust
+// avg for December (mth==12): 
 dis .1008837+.0001877
 
 *Directly calculate the means
@@ -86,33 +91,62 @@ gen x = rnormal()
 
 *i) Perform the OLS regression.
 reg p x
+di e(N)
+
 *ii) Obtain residuals from that regression.
 predict resid, residuals
+
+// do we have autocorrelations? 
 ac resid
+
 *iii) Generate the lagged residual.
 gen resid_lag1 = resid[_n-1]
+
 *iv)Perform the auxiliary regression of the residual on its own lag and the regressor grres.
 reg resid x  resid_lag
-reg resid x L(1/1).resid
-reg L(0/1).resid x
+di e(N)
+// the observations is 1 less than reg p x
+// because 1 lag + one unobserved data in reg p x 
+// which will be 2 times missing in the new sample
 
+reg resid x L(1/1).resid
 
 reg resid x L(1/3).resid
+di e(N)
+
 reg resid x L(1/5).resid
+di e(N)
+
 
 esttab, se r2
 
 *v) Compute the Breusch-Godfrey statistic using nR2 from the above regression.	
 dis 484 * 0.997 
 
+// other method
+estadd scalar nR2 = e(N)*e(r2)
+estadd scalar pval = chi2tail(e(df_m) - 1, e(nR2))
+
+/* 
+dis chi2(1,3.8414588) will produce .95, 
+which means that the probability of obtaining a value of 3.8414588 or less is .95
+, or, put differently, that 3.8414588 corresponds to the .95 quantile, 
+in the case of a chi-squared distribution with 1 d.f. 
+In contrast, dis chi2tail(1,3.8414588) will return .05 
+*/
+
+//chisq test -- https://www.wikiwand.com/en/Chi-squared_test
 
 reg resid x
 estat bgodfrey, lags(5)
 
 estat bgodfrey, lags(20)
 
-*(c)Correcting for Serial Correlation.
-*compute the T you need
+*--------------------------------------------------
+* Part 3: Correcting for Serial Correlation
+*--------------------------------------------------
+
+*compute the T (or the p?) you need
 reg p x, robust
 newey p x, lag(6) force
 
@@ -120,9 +154,18 @@ newey p x, lag(6) force
 reg L(0/26).p 
 estat bgodfrey, lags(26)
 
+*for large sample, we can use p = 0.75*T^(1/3)
+* scalar p = floor(0.75*e(N)^(1/3))
+
 *===========================================================
 log close 
 
 translate "$path\0303.smcl" ///
           "$path\0303.pdf", translator(smcl2pdf)
 
+/* Loose ends:
+
+1 - 
+
+
+*/ 
