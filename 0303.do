@@ -39,21 +39,25 @@ rename APU000072610 p
 rename DATE date
 destring p, replace
 
-*time format
+// look at: https://sscc.wisc.edu/sscc/pubs/stata_dates/stata_dates
+
+*we use "format" to make date readable
 format date %td
 
+
 *extract month and year
+// The year() function will extract the year from a date as a simple number:
+
 gen mth = month(date) 
 gen yr = year(date)
 
 *generate a new monthly time index
 gen month = ym(yr,mth)
+*let's format it to make it readable
 format month %tm
+*let's set month as our time-series periods
 tsset month
 
-*or
-//gen mdate = mofd(date)
-//format mdate %tm
 
 
 *seasonal?
