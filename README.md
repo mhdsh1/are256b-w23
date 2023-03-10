@@ -73,3 +73,24 @@ and this beautiful table from Richard Breen
 
 ## Week 5 - Feb 10
 MT 2022 Review
+
+## Week 6
+MT 2023 Feedback
+
+## Week 7
+Intro to time-series
+
+## Week 8
+Time-series with a focus on HW3
+
+## Week 9
+Time-series with a focus on FE and RE (HW4)
+
+We'll not cover:
+- time trend
+- random walk
+- spurious regression
+
+
+## Week 10
+Final prep
